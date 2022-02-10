@@ -1,0 +1,126 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html prefix="og: http://ogp.me/ns#" xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta property="og:type" content="website" />
+  <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+  <title>Ответ</title>
+
+  <style>
+    body {
+      font-family: 'Roboto';
+      max-width: 800px;
+      margin: auto;
+    }
+
+    textarea {
+      font-size: 1.4em;
+      font-family: 'Roboto';
+      max-width: 400px;
+      margin-right: 0.3em;
+      padding: 0.3em;
+      width: 100%;
+    }
+
+    .output {
+      background: #ebebeb;
+      font-size: 1.4em;
+      padding: 0.3em;
+      width: 100%;
+    }
+
+    .output .DT  { color: #dd470c; }
+    .output .JJ  { color: #ac0cdd; }
+    .output .PRP { color: #00bb32; }
+    .output .RB  { color: #72ef0c; }
+    .output .VBG { color: #ef790c; }
+    .output .VBN { color: #640eef; }
+    .output .VBZ { color: #0e76ef; }
+
+    .megaflexer {
+      display: flex;
+    }
+  </style>
+
+  <!-- TODO -->
+  <meta property="og:description" content="Задай вопрос. Получи ответ"/>
+  <meta property="og:title" content="Ответ"/>
+  <meta property="og:image" content="https://motovskikh.ru/img/hand.png"/>
+  <meta property="og:url" content="https://motovskikh.ru/answer/"/>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+</head>
+
+<body>
+  <h1>Переводчик терминов</h1>
+  <div class="megaflexer">
+    <textarea id="text" placeholder="Текст для перевода"></textarea>
+    <div class="output">Перевод</div>
+  </div>
+
+  <script>
+  </script>
+</body>
+
+<script>
+  function getPromise(addr, params) {
+    return new Promise((resolve, reject) => {
+      let xhr = new XMLHttpRequest();
+      xhr.open("POST", addr);
+      xhr.setRequestHeader("Content-Type", "application/json; charset=utf-8");
+      xhr.onreadystatechange = () => {
+        if (xhr.readyState !== 4) {
+          return;
+        }
+        if (xhr.status !== 200) {
+          reject();
+          return;
+        }
+
+        const result = JSON.parse(xhr.responseText);
+        if (!result.ok) {
+          reject();
+          return;
+        }
+        resolve(result);
+      };
+      try {
+        xhr.send(JSON.stringify(params));
+      } catch (error) {
+        console.log(error);
+      }
+    });
+  }
+
+  const textarea = document.querySelector("#text");
+  const output = document.querySelector(".output");
+
+  function blob() {
+    getPromise("/translate/", {text: textarea.value})
+    .then((resp) => {
+      output.innerHTML = '';
+      const tags = resp.result.tags;
+      const megaspan = document.createElement('span');
+      for (let tag of tags) {
+        const span = document.createElement('span');
+        span.innerText = tag[0];
+        span.classList.add(tag[1]);
+        megaspan.append(span);
+        megaspan.innerHTML += ' ';
+      }
+      output.append(megaspan);
+    });
+  }
+
+  let timer;
+  textarea.addEventListener('input', (e) => {
+    const text = e.currentTarget.value;
+    clearTimeout(timer);
+    timer = setTimeout(() => {
+      blob();
+    }, 1113);
+  })
+</script>
+
+</html>
