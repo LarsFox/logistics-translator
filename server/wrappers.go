@@ -11,7 +11,7 @@ import (
 type wrapper func(http.Handler) http.Handler
 
 /*
-// wrapBodyParams парсит JSON параметры из BODY запроса.
+// wrapBodyParams ...
 func (s *Server) wrapBodyParams(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var handlerName string
@@ -63,7 +63,7 @@ func (s *Server) wrapEasterEggHeader(inner http.Handler) http.Handler {
 	})
 }
 
-// wrapDuration записывает время обработки запроса.
+// wrapDuration logs the response duration.
 func (s *Server) wrapDuration(inner http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
@@ -74,8 +74,8 @@ func (s *Server) wrapDuration(inner http.Handler) http.Handler {
 	})
 }
 
-// wrapReadTemplates заново прочитывает все шаблоны на каждый запрос.
-// Срабатывает только при локальном запуске.
+// wrapReadTemplates re-reads the templates, so they could be refreshed easily.
+// TODO: disable for prod version.
 func (s *Server) wrapReadTemplates(inner http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		s.tmplMap = readTemplates("html/")
@@ -83,7 +83,7 @@ func (s *Server) wrapReadTemplates(inner http.Handler) http.Handler {
 	})
 }
 
-// wrapRecover отправляет ошибку.
+// wrapRecover recovers panics, should one occur.
 func (s *Server) wrapRecover(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var err error
@@ -108,8 +108,7 @@ func (s *Server) wrapRecover(h http.Handler) http.Handler {
 }
 
 /*
-// wrapScheme переадресует все http на https, а также убирает www.
-// Отключен для локальных запусков.
+// wrapScheme ...
 func (s *Server) wrapScheme(inner http.Handler) http.Handler {
 	if m.local {
 		return inner

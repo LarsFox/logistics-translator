@@ -7,21 +7,10 @@ import (
 	"os/exec"
 )
 
-type tmplMapData struct {
-	CanvasStyle   string   // дополнительный класс холста.
-	CustomCSS     []string // дополнительные ЦСС-файлы.
-	CSSLanguages  []string // ЦСС-файлы языков.
-	Description   string   // Тест на знание ...
-	International bool     // есть ли версия на английском.
-	Name          string   // sakha.
-	Language      string   // язык шаблона.
-	Title         string   // Как хорошо ....
-	Subjects      string   // regions, countries.
-	URL           string   // все, что после домена.
-}
+type tmplIndex struct{}
 
 func (s *Server) hndlrIndex(w http.ResponseWriter, r *http.Request) {
-	if err := s.tmplMap["index"].Execute(w, &tmplMapData{}); err != nil {
+	if err := s.tmplMap["index"].Execute(w, &tmplIndex{}); err != nil {
 		notify(err)
 		s.sendError(w, r, http.StatusInternalServerError)
 	}

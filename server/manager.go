@@ -54,13 +54,13 @@ func New() *Server {
 	return s
 }
 
-// Listen обрабатывает порт.
+// Listen servers the addr.
 func (s *Server) Listen(addr string) error {
 	log.Println("Translator started on addr", addr)
 	return http.ListenAndServe(addr, s.router)
 }
 
-// addHandlers добавляет пути и обработчики запросов в мультиплексор (mux).
+// addHandlers adds routes to mux.
 func (s *Server) addHandlers(routes []route) {
 	essentialWrappers := []wrapper{s.wrapEasterEggHeader, s.wrapDuration, s.wrapRecover}
 	for _, r := range routes {
@@ -100,8 +100,8 @@ func (s *Server) sendError(w http.ResponseWriter, _ *http.Request, code int) {
 	w.WriteHeader(code)
 }
 
-// getPrms парсит входящие в методы API параметры и валидирует их.
-// Размер тела запроса не может быть больше 1МБ (1048576 байт).
+// getPrms unmarshals request body and validates the result.
+// Body size is limited to 1 MB.
 func (s *Server) getPrms(r *http.Request, prms interface{}) error {
 	body, err := io.ReadAll(io.LimitReader(r.Body, 1048576))
 	if err != nil {

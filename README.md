@@ -1,3 +1,3 @@
-# Переводчик логистических терминов
+# Logistics terms translator
 
-Научный проект, пока что работаем.
+Academic project, work in progress.

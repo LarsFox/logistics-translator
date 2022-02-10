@@ -13,7 +13,6 @@ import (
 	bugsnag "github.com/bugsnag/bugsnag-go"
 )
 
-// Внутренние ошибки для багснага.
 var (
 	errNoParamsInBody  = errors.New("method has no params in body")
 	errUnknownError    = errors.New("unknown error")
@@ -74,7 +73,7 @@ func newLogger(local bool, path string) *log.Logger {
 	return log.New(outfile, "", 0)
 }
 
-// notify сообщает в багснаг об ошибке.
+// notify ...
 func notify(e error, meta ...interface{}) {
 	// log.Println(e, meta)
 	if err := bugsnag.Notify(e, meta...); err != nil {
