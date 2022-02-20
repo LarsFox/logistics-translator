@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"os/exec"
+	"sync"
 )
 
 type tmplIndex struct{}
@@ -32,21 +33,35 @@ func (s *Server) hndlrTranslate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	cmd := exec.Command("/usr/local/bin/python3", "python/blob.py", "-t", prms.Text)
-	// cmd.Stderr = log.Default().Writer()
-	out, err := cmd.Output()
-	if err != nil {
-		log.Println(err)
-		s.sendError(w, r, http.StatusInternalServerError)
-		return
-	}
-
+	result := map[string]interface{}{}
 	blob := map[string]interface{}{}
-	if err := json.Unmarshal(out, &blob); err != nil {
-		log.Println(err)
-		s.sendError(w, r, http.StatusInternalServerError)
-		return
-	}
 
-	s.send(w, r, blob)
+	wg := sync.WaitGroup{}
+	wg.Add(2)
+
+	go func() {
+		defer wg.Done()
+		result["glossary"] = s.findGlossaryEntries(prms.Text)
+	}()
+
+	go func() {
+		defer wg.Done()
+		cmd := exec.Command("/usr/bin/python3", "python/blob.py", "-t", prms.Text)
+		// cmd.Stderr = log.Default().Writer()
+		out, err := cmd.Output()
+		if err != nil {
+			log.Printf("python exec err: %v", err)
+			return
+		}
+
+		if err := json.Unmarshal(out, &blob); err != nil {
+			log.Println(err)
+			return
+		}
+		result["blob"] = blob
+	}()
+
+	wg.Wait()
+
+	s.send(w, r, result)
 }

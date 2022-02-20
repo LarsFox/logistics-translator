@@ -13,8 +13,9 @@ import (
 
 // Server ...
 type Server struct {
-	router  *mux.Router
-	tmplMap map[string]*template.Template
+	glossary map[string]string
+	router   *mux.Router
+	tmplMap  map[string]*template.Template
 }
 
 // route is a single path for a mux handler.
@@ -28,9 +29,15 @@ type route struct {
 
 // New ...
 func New() *Server {
+	glossary, err := newGlossary("python/glossary.csv")
+	if err != nil {
+		log.Println(err)
+	}
+
 	s := &Server{
-		router:  mux.NewRouter().StrictSlash(true),
-		tmplMap: readTemplates("html/"),
+		glossary: glossary,
+		router:   mux.NewRouter().StrictSlash(true),
+		tmplMap:  readTemplates("html/"),
 	}
 
 	// Notes.

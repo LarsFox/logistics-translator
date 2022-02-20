@@ -40,9 +40,10 @@ from textblob import TextBlob
 # WRB wh-abverb where, when
 
 def main(args):
-    blob = TextBlob(args.text)
+    sentences = args.text.split('. ')
+    blob = [TextBlob(s).tags for s in sentences]
     print(json.dumps({
-        "tags": blob.tags
+        "tags": blob
     }, ensure_ascii=False))
 
 

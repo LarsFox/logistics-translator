@@ -10,8 +10,7 @@
   <style>
     body {
       font-family: 'Roboto';
-      max-width: 800px;
-      margin: auto;
+      margin: 0 3em;
     }
 
     textarea {
@@ -23,11 +22,27 @@
       width: 100%;
     }
 
+    .outputs {
+      margin-left: 1.5em;
+      width: 100%;
+    }
+    .outputs h2:first-child {
+      margin-top: 0;
+    }
+    .outputs h2 {
+      margin-bottom: 0.3em;
+    }
+
     .output {
       background: #ebebeb;
       font-size: 1.4em;
+      margin-bottom: 0.5em;
       padding: 0.3em;
       width: 100%;
+    }
+
+    .output p {
+      margin-top: 0;
     }
 
     .output .DT  { color: #dd470c; }
@@ -67,7 +82,14 @@
   <h1>Logistics terms translator</h1>
   <div class="megaflexer">
     <textarea id="text" placeholder="Text to translate"></textarea>
-    <div class="output">Translation</div>
+    <div class="outputs">
+      <h2>Translation</h2>
+      <div id="translation" class="output"></div>
+      <h2>Translation memory</h2>
+      <div id="memory" class="output"></div>
+      <h2>Glossary</h2>
+      <div id="glossary" class="output"></div>
+    </div>
   </div>
 
   <script>
@@ -105,22 +127,31 @@
   }
 
   const textarea = document.querySelector("#text");
-  const output = document.querySelector(".output");
+  const glossary = document.querySelector("#glossary");
+  const translation = document.querySelector("#translation");
 
   function blob() {
     getPromise("/translate/", {text: textarea.value})
     .then((resp) => {
-      output.innerHTML = '';
-      const tags = resp.result.tags;
-      const megaspan = document.createElement('span');
-      for (let tag of tags) {
-        const span = document.createElement('span');
-        span.innerText = tag[0];
-        span.classList.add(tag[1]);
-        megaspan.append(span);
-        megaspan.innerHTML += ' ';
+      glossary.innerHTML = '';
+      for (term of resp.result.glossary) {
+        const p = document.createElement('p');
+        p.innerHTML = term;
+        glossary.appendChild(p);
       }
-      output.append(megaspan);
+
+      translation.innerHTML = '';
+      for (let tags of resp.result.blob.tags) {
+        const megaspan = document.createElement('p');
+        for (let tag of tags) {
+          const span = document.createElement('span');
+          span.innerText = tag[0];
+          span.classList.add(tag[1]);
+          megaspan.append(span);
+          megaspan.innerHTML += ' ';
+        }
+        translation.append(megaspan);
+      }
     });
   }
 
