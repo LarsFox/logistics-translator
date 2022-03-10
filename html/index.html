@@ -13,13 +13,18 @@
       margin: 0 3em;
     }
 
+    .text {
+      max-width: 400px;
+      width: 100%;
+    }
+
     textarea {
       font-size: 1.4em;
       font-family: 'Roboto';
+      height: 100%;
       max-width: 400px;
       margin-right: 0.3em;
       padding: 0.3em;
-      width: 100%;
     }
 
     .outputs {
@@ -62,7 +67,7 @@
   <link rel="apple-touch-icon" sizes="180x180" href="https://motovskikh.ru/img/favicon/apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="32x32" href="https://motovskikh.ru/img/favicon/favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="https://motovskikh.ru/img/favicon/favicon-16x16.png">
-  <link rel="manifest" href="https://motovskikh.ru/img/favicon/site.webmanifest">
+  <!-- <link rel="manifest" href="https://motovskikh.ru/img/favicon/site.webmanifest"> -->
   <link rel="mask-icon" href="https://motovskikh.ru/img/favicon/safari-pinned-tab.svg" color="#5bbad5">
   <link rel="shortcut icon" href="https://motovskikh.ru/img/favicon/favicon.ico">
   <meta name="msapplication-TileColor" content="#da532c">
@@ -81,10 +86,15 @@
 <body>
   <h1>Logistics terms translator</h1>
   <div class="megaflexer">
-    <textarea id="text" placeholder="Text to translate"></textarea>
+    <div class="text">
+      <textarea id="text" placeholder="Text to translate"></textarea>
+      <button class="sample">Sample</button>
+    </div>
     <div class="outputs">
       <h2>Translation</h2>
       <div id="translation" class="output"></div>
+      <h2>Text analysis</h2>
+      <div id="blob" class="output"></div>
       <h2>Translation memory</h2>
       <div id="memory" class="output"></div>
       <h2>Glossary</h2>
@@ -127,20 +137,28 @@
   }
 
   const textarea = document.querySelector("#text");
+  const blob = document.querySelector("#blob");
   const glossary = document.querySelector("#glossary");
   const translation = document.querySelector("#translation");
 
-  function blob() {
+  function call() {
     getPromise("/translate/", {text: textarea.value})
     .then((resp) => {
       glossary.innerHTML = '';
-      for (term of resp.result.glossary) {
-        const p = document.createElement('p');
-        p.innerHTML = term;
-        glossary.appendChild(p);
+      if (resp.result.glossary !== null) {
+        for (term of resp.result.glossary) {
+          const p = document.createElement('p');
+          p.innerHTML = term;
+          glossary.appendChild(p);
+        }
       }
 
       translation.innerHTML = '';
+      if (resp.result.google !== null) {
+        translation.innerHTML = resp.result.google;
+      }
+
+      blob.innerHTML = '';
       for (let tags of resp.result.blob.tags) {
         const megaspan = document.createElement('p');
         for (let tag of tags) {
@@ -150,7 +168,7 @@
           megaspan.append(span);
           megaspan.innerHTML += ' ';
         }
-        translation.append(megaspan);
+        blob.append(megaspan);
       }
     });
   }
@@ -160,9 +178,14 @@
     const text = e.currentTarget.value;
     clearTimeout(timer);
     timer = setTimeout(() => {
-      blob();
+      call();
     }, 1113);
   })
+
+  document.querySelector('button.sample').onclick = () => {
+    textarea.innerHTML = 'Logistics refers to the overall process of managing how resources are acquired, stored, and transported to their final destination.';
+    call();
+  };
 </script>
 
 </html>

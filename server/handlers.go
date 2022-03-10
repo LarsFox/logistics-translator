@@ -37,7 +37,19 @@ func (s *Server) hndlrTranslate(w http.ResponseWriter, r *http.Request) {
 	blob := map[string]interface{}{}
 
 	wg := sync.WaitGroup{}
-	wg.Add(2)
+	wg.Add(3)
+
+	go func() {
+		defer wg.Done()
+		cmd := exec.Command("/usr/bin/python3", "python/google_translator.py", "-t", prms.Text)
+		out, err := cmd.Output()
+		if err != nil {
+			log.Printf("python exec err: %v", err)
+			return
+		}
+
+		result["google"] = string(out)
+	}()
 
 	go func() {
 		defer wg.Done()
@@ -47,7 +59,6 @@ func (s *Server) hndlrTranslate(w http.ResponseWriter, r *http.Request) {
 	go func() {
 		defer wg.Done()
 		cmd := exec.Command("/usr/bin/python3", "python/blob.py", "-t", prms.Text)
-		// cmd.Stderr = log.Default().Writer()
 		out, err := cmd.Output()
 		if err != nil {
 			log.Printf("python exec err: %v", err)
