@@ -13,6 +13,20 @@
       margin: 0 3em;
     }
 
+    h1 {
+      align-items: center;
+      display: flex;
+      justify-content: flex-start;
+    }
+    h1 svg {
+      height: 2.3rem;
+      margin: 0 0 0 0.3rem;
+      width: 2.3rem;
+    }
+    h1 svg.hidden {
+      display: none;
+    }
+
     .text {
       max-width: 400px;
       width: 100%;
@@ -86,10 +100,65 @@
 </head>
 
 <body>
-  <h1>Logistics terms translator</h1>
+  <h1>
+    Logistics terms translator
+
+    <svg class="hidden" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="200px" height="200px" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid">
+      <g transform="rotate(0 50 50)">
+        <rect x="47" y="24" rx="3" ry="6" width="6" height="12" fill="#0099e5">
+          <animate attributeName="opacity" values="1;0" keyTimes="0;1" dur="1s" begin="-0.9166666666666666s" repeatCount="indefinite"></animate>
+        </rect>
+      </g><g transform="rotate(30 50 50)">
+        <rect x="47" y="24" rx="3" ry="6" width="6" height="12" fill="#0099e5">
+          <animate attributeName="opacity" values="1;0" keyTimes="0;1" dur="1s" begin="-0.8333333333333334s" repeatCount="indefinite"></animate>
+        </rect>
+      </g><g transform="rotate(60 50 50)">
+        <rect x="47" y="24" rx="3" ry="6" width="6" height="12" fill="#0099e5">
+          <animate attributeName="opacity" values="1;0" keyTimes="0;1" dur="1s" begin="-0.75s" repeatCount="indefinite"></animate>
+        </rect>
+      </g><g transform="rotate(90 50 50)">
+        <rect x="47" y="24" rx="3" ry="6" width="6" height="12" fill="#0099e5">
+          <animate attributeName="opacity" values="1;0" keyTimes="0;1" dur="1s" begin="-0.6666666666666666s" repeatCount="indefinite"></animate>
+        </rect>
+      </g><g transform="rotate(120 50 50)">
+        <rect x="47" y="24" rx="3" ry="6" width="6" height="12" fill="#0099e5">
+          <animate attributeName="opacity" values="1;0" keyTimes="0;1" dur="1s" begin="-0.5833333333333334s" repeatCount="indefinite"></animate>
+        </rect>
+      </g><g transform="rotate(150 50 50)">
+        <rect x="47" y="24" rx="3" ry="6" width="6" height="12" fill="#0099e5">
+          <animate attributeName="opacity" values="1;0" keyTimes="0;1" dur="1s" begin="-0.5s" repeatCount="indefinite"></animate>
+        </rect>
+      </g><g transform="rotate(180 50 50)">
+        <rect x="47" y="24" rx="3" ry="6" width="6" height="12" fill="#0099e5">
+          <animate attributeName="opacity" values="1;0" keyTimes="0;1" dur="1s" begin="-0.4166666666666667s" repeatCount="indefinite"></animate>
+        </rect>
+      </g><g transform="rotate(210 50 50)">
+        <rect x="47" y="24" rx="3" ry="6" width="6" height="12" fill="#0099e5">
+          <animate attributeName="opacity" values="1;0" keyTimes="0;1" dur="1s" begin="-0.3333333333333333s" repeatCount="indefinite"></animate>
+        </rect>
+      </g><g transform="rotate(240 50 50)">
+        <rect x="47" y="24" rx="3" ry="6" width="6" height="12" fill="#0099e5">
+          <animate attributeName="opacity" values="1;0" keyTimes="0;1" dur="1s" begin="-0.25s" repeatCount="indefinite"></animate>
+        </rect>
+      </g><g transform="rotate(270 50 50)">
+        <rect x="47" y="24" rx="3" ry="6" width="6" height="12" fill="#0099e5">
+          <animate attributeName="opacity" values="1;0" keyTimes="0;1" dur="1s" begin="-0.16666666666666666s" repeatCount="indefinite"></animate>
+        </rect>
+      </g><g transform="rotate(300 50 50)">
+        <rect x="47" y="24" rx="3" ry="6" width="6" height="12" fill="#0099e5">
+          <animate attributeName="opacity" values="1;0" keyTimes="0;1" dur="1s" begin="-0.08333333333333333s" repeatCount="indefinite"></animate>
+        </rect>
+      </g><g transform="rotate(330 50 50)">
+        <rect x="47" y="24" rx="3" ry="6" width="6" height="12" fill="#0099e5">
+          <animate attributeName="opacity" values="1;0" keyTimes="0;1" dur="1s" begin="0s" repeatCount="indefinite"></animate>
+        </rect>
+      </g>
+    </svg>
+
+  </h1>
   <div class="megaflexer">
     <div class="text">
-      <textarea id="text" placeholder="Text to translate"></textarea>
+      <textarea id="text" placeholder="Text in English to translate"></textarea>
       <button class="sample">Sample</button>
     </div>
     <div class="outputs">
@@ -140,12 +209,13 @@
 
   const textarea = document.querySelector("#text");
   const blob = document.querySelector("#blob");
+  const loading = document.querySelector("h1 svg");
   const glossary = document.querySelector("#glossary");
   const translation = document.querySelector("#translation");
 
   function call() {
-    getPromise("/translate/", {text: textarea.value})
-    .then((resp) => {
+    loading.classList.remove('hidden');
+    getPromise("/translate/", {text: textarea.value}).then((resp) => {
       glossary.innerHTML = '';
       if (resp.result.glossary !== null) {
         for (term of resp.result.glossary) {
@@ -172,6 +242,8 @@
         }
         blob.append(megaspan);
       }
+
+      loading.classList.add('hidden');
     });
   }
 
@@ -185,7 +257,7 @@
   })
 
   document.querySelector('button.sample').onclick = () => {
-    textarea.innerHTML = 'Logistics refers to the overall process of managing how resources are acquired, stored, and transported to their final destination.';
+    textarea.value = 'Logistics refers to the overall process of managing how resources are acquired, stored, and transported to their final destination.';
     call();
   };
 </script>
