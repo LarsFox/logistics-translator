@@ -2,29 +2,22 @@ package server
 
 import (
 	"errors"
-	"fmt"
 	"html/template"
 	"log"
 	"os"
 	"path/filepath"
 	"strings"
-	"time"
 
 	bugsnag "github.com/bugsnag/bugsnag-go"
 )
 
 var (
-	errNoParamsInBody  = errors.New("method has no params in body")
-	errUnknownError    = errors.New("unknown error")
-	errUnknownLanguage = errors.New("unknown language")
-	errUnnamedMethod   = errors.New("unnamed method")
+	errUnknownError = errors.New("unknown error")
 )
 
-var tmplDefault = template.Must(template.New("go").Parse("blank"))
-
-func readTemplates(folder string) map[string]*template.Template {
+func readTemplates(folder string) (map[string]*template.Template, error) {
 	templates := map[string]*template.Template{}
-	if err := filepath.Walk(folder, func(name string, info os.FileInfo, err error) error {
+	if err := filepath.Walk(folder, func(name string, info os.FileInfo, _ error) error {
 		if info == nil {
 			return os.ErrNotExist
 		}
@@ -38,39 +31,38 @@ func readTemplates(folder string) map[string]*template.Template {
 		}
 
 		noHTML := name[len(folder) : len(name)-5]
-		templates[noHTML] = newTemplate(name, noHTML)
+		tmpl, err := newTemplate(name, noHTML)
+		if err != nil {
+			return err
+		}
+
+		templates[noHTML] = tmpl
+
 		return nil
+
 	}); err != nil {
-		return nil
+		return nil, err
 	}
-	return templates
+
+	if len(templates) == 0 {
+		return nil, errors.New("found no templates in folder")
+	}
+
+	return templates, nil
 }
 
-func newTemplate(path, name string) *template.Template {
+func newTemplate(path, name string) (*template.Template, error) {
 	b, err := os.ReadFile(path)
 	if err != nil {
-		notify(err)
-		return tmplDefault
+		return nil, err
 	}
+
 	tmpl, err := template.New(name).Parse(string(b))
 	if err != nil {
-		notify(err)
-		return tmplDefault
-	}
-	return tmpl
-}
-
-func newLogger(local bool, path string) *log.Logger {
-	if local {
-		return log.Default()
+		return nil, err
 	}
 
-	outfile, err := os.Create(fmt.Sprintf("%s/log_%d.log", path, time.Now().Unix()))
-	if err != nil {
-		log.Printf("unable to touch log file: %v", err)
-		return log.Default()
-	}
-	return log.New(outfile, "", 0)
+	return tmpl, nil
 }
 
 // notify ...

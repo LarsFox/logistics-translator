@@ -1,55 +1,60 @@
 package server
 
 import (
+	"fmt"
 	"os"
 	"regexp"
 	"strings"
 )
 
-func newGlossary(path string) (map[string]string, error) {
+func newGlossary(path string) ([]glossaryTerm, error) {
 	b, err := os.ReadFile(path)
 	if err != nil {
 		return nil, err
 	}
 
-	glossary := map[string]string{}
+	glossary := []glossaryTerm{}
 	for _, line := range strings.Split(string(b), "\n") {
 		separated := strings.Split(line, ";")
 		if len(separated) != 2 {
 			continue
 		}
 
-		glossary[separated[0]] = separated[1]
+		glossary = append(glossary, glossaryTerm{
+			gloss: separated[0],
+			term:  separated[1],
+		})
+		glossary = append(glossary, glossaryTerm{
+			gloss: separated[1],
+			term:  separated[0],
+		})
 	}
 	return glossary, nil
 }
 
-var puncts = regexp.MustCompile("[a-zа-я-]+")
+func (s *Server) tagGlossaryEntries(text string) string {
+	lowered := strings.ToLower(text)
+	for i, term := range s.glossary {
+		lowered = strings.ReplaceAll(lowered, term.term, fmt.Sprintf("<term-%d>%s</term-%d>", i, term.term, i))
+	}
 
-func (s *Server) findGlossaryEntries(text string) []string {
-	var entries []string
-	duplicates := map[string]bool{}
-	for _, word := range strings.Split(strings.ToLower(text), " ") {
-		trimmed := strings.Trim(word, " ")
-		if duplicates[trimmed] {
-			continue
+	return lowered
+}
+
+func (s *Server) replaceGlossaryEntries(translated string) (string, error) {
+	lowered := strings.ToLower(translated)
+
+	for i, term := range s.glossary {
+		re, err := regexp.Compile(fmt.Sprintf("<term-%d>.*?</term-%d>", i, i))
+		if err != nil {
+			return "", err
 		}
 
-		found := puncts.FindAllString(trimmed, -1)
-		for _, match := range found {
-			value, ok := s.glossary[match]
-			if !ok {
-				continue
-			}
-
-			if duplicates[match] {
-				continue
-			}
-
-			entries = append(entries, value)
-			duplicates[match] = true
+		replaced := fmt.Sprintf("<span class='match'>%s</span>", term.gloss)
+		for _, match := range re.FindAllString(lowered, -1) {
+			lowered = strings.ReplaceAll(lowered, match, replaced)
 		}
 	}
 
-	return entries
+	return lowered, nil
 }

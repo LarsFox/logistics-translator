@@ -26,9 +26,18 @@
     h1 svg.hidden {
       display: none;
     }
+    h2:first-child {
+      margin-top: 0;
+    }
+    h2 {
+      margin-bottom: 0.3em;
+    }
 
     .text {
-      max-width: 400px;
+      display: flex;
+      flex-direction: column;
+      max-width: 500px;
+      min-width: 400px;
       width: 100%;
     }
 
@@ -36,8 +45,8 @@
       box-sizing: border-box;
       font-size: 1.4em;
       font-family: 'Roboto';
-      height: 100%;
-      max-width: 400px;
+      height: 150px;
+      max-width: 500px;
       margin: 0 0.3em 0.3em 0;
       padding: 0.3em;
       width: 100%;
@@ -45,13 +54,8 @@
 
     .outputs {
       margin-left: 1.5em;
+      max-width: 500px;
       width: 100%;
-    }
-    .outputs h2:first-child {
-      margin-top: 0;
-    }
-    .outputs h2 {
-      margin-bottom: 0.3em;
     }
 
     .output {
@@ -66,14 +70,19 @@
       margin-top: 0;
     }
 
+    .output .TO  { color: #8d0606; }
     .output .DT  { color: #dd470c; }
     .output .JJ  { color: #ac0cdd; }
+    .output .NNP { color: #5d0378; }
     .output .PRP { color: #00bb32; }
     .output .RB  { color: #72ef0c; }
+    .output .IN  { color: #0753a9; }
     .output .VBG { color: #ef790c; }
     .output .VBN { color: #640eef; }
     .output .VBZ { color: #0e76ef; }
 
+    .output .match { color: #ef790c; }
+    
     .megaflexer {
       display: flex;
     }
@@ -158,16 +167,17 @@
   </h1>
   <div class="megaflexer">
     <div class="text">
+      <h2>Text input</h2>
       <textarea id="text" placeholder="Text in English to translate"></textarea>
-      <button class="sample">Sample</button>
+      <div>
+        <button class="sample">Sample</button>
+      </div>
     </div>
     <div class="outputs">
       <h2>Translation</h2>
       <div id="translation" class="output"></div>
       <h2>Text analysis</h2>
       <div id="blob" class="output"></div>
-      <h2>Translation memory</h2>
-      <div id="memory" class="output"></div>
       <h2>Glossary</h2>
       <div id="glossary" class="output"></div>
     </div>
@@ -218,16 +228,12 @@
     getPromise("/translate/", {text: textarea.value}).then((resp) => {
       glossary.innerHTML = '';
       if (resp.result.glossary !== null) {
-        for (term of resp.result.glossary) {
-          const p = document.createElement('p');
-          p.innerHTML = term;
-          glossary.appendChild(p);
-        }
+        glossary.innerHTML = resp.result.glossary;
       }
 
       translation.innerHTML = '';
       if (resp.result.google !== null) {
-        translation.innerHTML = resp.result.google;
+        translation.textContent = resp.result.google;
       }
 
       blob.innerHTML = '';
@@ -257,7 +263,7 @@
   })
 
   document.querySelector('button.sample').onclick = () => {
-    textarea.value = 'Logistics refers to the overall process of managing how resources are acquired, stored, and transported to their final destination.';
+    textarea.value = 'To open a seal use the MB-15 seal opener.';
     call();
   };
 </script>

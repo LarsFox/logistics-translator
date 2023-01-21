@@ -78,7 +78,14 @@ func (s *Server) wrapDuration(inner http.Handler) http.Handler {
 // TODO: disable for prod version.
 func (s *Server) wrapReadTemplates(inner http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		s.tmplMap = readTemplates("html/")
+		tmplMap, err := readTemplates(s.htmlPath)
+		if err != nil {
+			log.Println(err)
+			inner.ServeHTTP(w, r)
+			return
+		}
+
+		s.tmplMap = tmplMap
 		inner.ServeHTTP(w, r)
 	})
 }

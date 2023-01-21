@@ -11,7 +11,7 @@ import (
 type tmplIndex struct{}
 
 func (s *Server) hndlrIndex(w http.ResponseWriter, r *http.Request) {
-	if err := s.tmplMap["index"].Execute(w, &tmplIndex{}); err != nil {
+	if err := s.tmplMap["/index"].Execute(w, &tmplIndex{}); err != nil {
 		notify(err)
 		s.sendError(w, r, http.StatusInternalServerError)
 	}
@@ -21,11 +21,6 @@ type prmsTranslate struct {
 	Text string `json:"text"`
 }
 
-type respTranslate struct {
-	Text string `json:"text"`
-}
-
-// todo: queues
 func (s *Server) hndlrTranslate(w http.ResponseWriter, r *http.Request) {
 	prms := &prmsTranslate{}
 	if err := s.getPrms(r, prms); err != nil {
@@ -41,24 +36,36 @@ func (s *Server) hndlrTranslate(w http.ResponseWriter, r *http.Request) {
 
 	go func() {
 		defer wg.Done()
-		cmd := exec.Command("/usr/bin/python3", "python/google_translator.py", "-t", prms.Text)
-		out, err := cmd.Output()
+		out, err := s.googleTranslate(prms.Text)
 		if err != nil {
 			log.Printf("python exec err: %v", err)
 			return
 		}
 
-		result["google"] = string(out)
+		result["google"] = out
 	}()
 
 	go func() {
 		defer wg.Done()
-		result["glossary"] = s.findGlossaryEntries(prms.Text)
+		tagged := s.tagGlossaryEntries(prms.Text)
+		translated, err := s.googleTranslate(tagged)
+		if err != nil {
+			log.Printf("python exec err: %v", err)
+			return
+		}
+
+		replaced, err := s.replaceGlossaryEntries(string(translated))
+		if err != nil {
+			log.Printf("replace tag err: %v", err)
+			return
+		}
+
+		result["glossary"] = replaced
 	}()
 
 	go func() {
 		defer wg.Done()
-		cmd := exec.Command("/usr/bin/python3", "python/blob.py", "-t", prms.Text)
+		cmd := exec.Command("/usr/bin/python3", s.pythonScriptsPath+"/blob.py", "-t", prms.Text)
 		out, err := cmd.Output()
 		if err != nil {
 			log.Printf("python exec err: %v", err)
@@ -69,10 +76,21 @@ func (s *Server) hndlrTranslate(w http.ResponseWriter, r *http.Request) {
 			log.Println(err)
 			return
 		}
+
 		result["blob"] = blob
 	}()
 
 	wg.Wait()
 
 	s.send(w, r, result)
+}
+
+func (s *Server) googleTranslate(text string) (string, error) {
+	cmd := exec.Command("/usr/bin/python3", s.pythonScriptsPath+"/google_translator.py", "-t", text)
+	out, err := cmd.Output()
+	if err != nil {
+		return "", err
+	}
+
+	return string(out), nil
 }

@@ -11,11 +11,18 @@ import (
 	"github.com/gorilla/mux"
 )
 
+type glossaryTerm struct {
+	term  string
+	gloss string
+}
+
 // Server ...
 type Server struct {
-	glossary map[string]string
-	router   *mux.Router
-	tmplMap  map[string]*template.Template
+	glossary          []glossaryTerm
+	router            *mux.Router
+	htmlPath          string
+	pythonScriptsPath string
+	tmplMap           map[string]*template.Template
 }
 
 // route is a single path for a mux handler.
@@ -28,16 +35,23 @@ type route struct {
 }
 
 // New ...
-func New() *Server {
-	glossary, err := newGlossary("python/glossary.csv")
+func New(glossaryPath, htmlPath, pythonScriptsPath string) *Server {
+	glossary, err := newGlossary(glossaryPath)
 	if err != nil {
-		log.Println(err)
+		log.Fatal(err)
+	}
+
+	tmplMap, err := readTemplates(htmlPath)
+	if err != nil {
+		log.Fatal(err)
 	}
 
 	s := &Server{
-		glossary: glossary,
-		router:   mux.NewRouter().StrictSlash(true),
-		tmplMap:  readTemplates("html/"),
+		glossary:          glossary,
+		router:            mux.NewRouter().StrictSlash(true),
+		pythonScriptsPath: pythonScriptsPath,
+		htmlPath:          htmlPath,
+		tmplMap:           tmplMap,
 	}
 
 	// Notes.
