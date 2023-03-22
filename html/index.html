@@ -23,7 +23,7 @@
       margin: 0 0 0 0.3rem;
       width: 2.3rem;
     }
-    h1 svg.hidden {
+    .hidden {
       display: none;
     }
     h2:first-child {
@@ -176,10 +176,12 @@
     <div class="outputs">
       <h2>Translation</h2>
       <div id="translation" class="output"></div>
+      <h2>Examples</h2>
+      <div id="examples" class="output"></div>
       <h2>Text analysis</h2>
       <div id="blob" class="output"></div>
-      <h2>Glossary</h2>
-      <div id="glossary" class="output"></div>
+      <h2 class="hidden">Glossary</h2>
+      <div id="glossary" class="output hidden"></div>
     </div>
   </div>
 
@@ -222,31 +224,39 @@
   const loading = document.querySelector("h1 svg");
   const glossary = document.querySelector("#glossary");
   const translation = document.querySelector("#translation");
+  const examples = document.querySelector("#examples");
 
   function call() {
     loading.classList.remove('hidden');
     getPromise("/translate/", {text: textarea.value}).then((resp) => {
       glossary.innerHTML = '';
-      if (resp.result.glossary !== null) {
+      if (resp.result.glossary !== undefined) {
         glossary.innerHTML = resp.result.glossary;
       }
 
       translation.innerHTML = '';
-      if (resp.result.google !== null) {
+      if (resp.result.google !== undefined) {
         translation.textContent = resp.result.google;
       }
 
+      examples.innerHTML = '';
+      if (resp.result.example !== undefined) {
+        examples.textContent = resp.result.example;
+      }
+
       blob.innerHTML = '';
-      for (let tags of resp.result.blob.tags) {
-        const megaspan = document.createElement('p');
-        for (let tag of tags) {
-          const span = document.createElement('span');
-          span.innerText = tag[0];
-          span.classList.add(tag[1]);
-          megaspan.append(span);
-          megaspan.innerHTML += ' ';
+      if (resp.result.blob !== undefined) {
+        for (let tags of resp.result.blob.tags) {
+          const megaspan = document.createElement('p');
+          for (let tag of tags) {
+            const span = document.createElement('span');
+            span.innerText = tag[0];
+            span.classList.add(tag[1]);
+            megaspan.append(span);
+            megaspan.innerHTML += ' ';
+          }
+          blob.append(megaspan);
         }
-        blob.append(megaspan);
       }
 
       loading.classList.add('hidden');
@@ -263,7 +273,7 @@
   })
 
   document.querySelector('button.sample').onclick = () => {
-    textarea.value = 'To open a seal use the MB-15 seal opener.';
+    textarea.value = 'electronic seal';
     call();
   };
 </script>

@@ -1,4 +1,2 @@
-накладная;rail consignment note
-склад;warehouse
-перегрузка;containers
-seal;пломба
+электронная пломба;electronic seal;Automatic identification of fleet and electronic seal of freight containers;An electronic seal is data in electronic form, which is attached to or logically associated with other data in electronic form to ensure the latter’s origin and integrity, where the creator of a seal is a legal person (unlike the electronic signature that is issued by a natural person).
+оператор пломбирования;sealing operator;In order to harmonise the procedures, the so-called Consortium of sealing operators from the EEU countries (Eurasian Economic Union) was established, which includes operators from Kazakhstan, Armenia, Kyrgyzstan, Russia and Belarus.;An organization that has an information technology infrastructure that collects, processes, transmits and stores information received from electronic navigation seals that are an integral part of such infrastructure, authorized by the Ministry of Transport of the Russian Federation for the implementation of activities for the imposition (removal) and application ENS

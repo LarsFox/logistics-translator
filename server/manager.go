@@ -12,8 +12,10 @@ import (
 )
 
 type glossaryTerm struct {
-	term  string
-	gloss string
+	termRu     string
+	termEn     string
+	example    string
+	definition string
 }
 
 // Server ...
