@@ -90,6 +90,12 @@ func (s *Server) hndlrTranslate(w http.ResponseWriter, r *http.Request) {
 		result["blob"] = blob
 	}()
 
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		result["glossary"] = s.findGloss(prms.Text)
+	}()
+
 	wg.Wait()
 
 	s.send(w, r, result)

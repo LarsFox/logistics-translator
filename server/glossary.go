@@ -19,11 +19,28 @@ func newGlossary(path string) ([]glossaryTerm, error) {
 		}
 
 		glossary = append(glossary, glossaryTerm{
-			termRu:     separated[0],
-			termEn:     separated[1],
+			term:       separated[0],
+			gloss:      separated[1],
+			example:    separated[2],
+			definition: separated[3],
+		})
+		glossary = append(glossary, glossaryTerm{
+			gloss:      separated[0],
+			term:       separated[1],
 			example:    separated[2],
 			definition: separated[3],
 		})
 	}
+
 	return glossary, nil
+}
+
+func (s *Server) findGloss(text string) string {
+	for _, g := range s.glossary {
+		if g.term == text {
+			return g.gloss
+		}
+	}
+
+	return "—"
 }

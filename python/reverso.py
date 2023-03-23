@@ -18,9 +18,12 @@ def main(args):
 
 
 def example(api):
+    i = 0
     for ex in api.get_examples():
         print(ex[1].text)
-        return
+        i += 1
+        if i == 4:
+            return
 
 
 def translation(api):

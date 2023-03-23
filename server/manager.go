@@ -12,8 +12,8 @@ import (
 )
 
 type glossaryTerm struct {
-	termRu     string
-	termEn     string
+	term       string
+	gloss      string
 	example    string
 	definition string
 }

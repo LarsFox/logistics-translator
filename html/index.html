@@ -176,12 +176,12 @@
     <div class="outputs">
       <h2>Translation</h2>
       <div id="translation" class="output"></div>
-      <h2>Examples</h2>
-      <div id="examples" class="output"></div>
+      <h2>Glossary</h2>
+      <div id="glossary" class="output"></div>
       <h2>Text analysis</h2>
       <div id="blob" class="output"></div>
-      <h2 class="hidden">Glossary</h2>
-      <div id="glossary" class="output hidden"></div>
+      <h2>Examples</h2>
+      <div id="examples" class="output"></div>
     </div>
   </div>
 
@@ -241,7 +241,11 @@
 
       examples.innerHTML = '';
       if (resp.result.example !== undefined) {
-        examples.textContent = resp.result.example;
+        resp.result.example.split("\n").forEach(element => {
+          const p = document.createElement("p");
+          p.textContent = element;
+          examples.appendChild(p);
+        });
       }
 
       blob.innerHTML = '';
