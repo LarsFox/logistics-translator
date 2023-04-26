@@ -171,6 +171,14 @@
       <textarea id="text" placeholder="Text in English to translate"></textarea>
       <div>
         <button class="sample">Sample</button>
+        <select name="lang" id="langSelect">
+          <option value="en-ru">En → Ру</option>
+          <option value="ru-en">Ру → En</option>
+          <option value="en-de">En → De</option>
+          <option value="de-en">De → En</option>
+          <option value="de-ru">De → Ру</option>
+          <option value="ru-de">Ру → De</option>
+      </select>
       </div>
     </div>
     <div class="outputs">
@@ -220,6 +228,7 @@
   }
 
   const textarea = document.querySelector("#text");
+  const langSelect = document.querySelector("#langSelect");
   const blob = document.querySelector("#blob");
   const loading = document.querySelector("h1 svg");
   const glossary = document.querySelector("#glossary");
@@ -228,7 +237,8 @@
 
   function call() {
     loading.classList.remove('hidden');
-    getPromise("/translate/", {text: textarea.value}).then((resp) => {
+    const langs = langSelect.value.split("-");
+    getPromise("/translate/", {text: textarea.value, from: langs[0], to: langs[1]}).then((resp) => {
       glossary.innerHTML = '';
       if (resp.result.glossary !== undefined) {
         glossary.innerHTML = resp.result.glossary;
@@ -275,6 +285,8 @@
       call();
     }, 1113);
   })
+
+  langSelect.onchange = call;
 
   document.querySelector('button.sample').onclick = () => {
     textarea.value = 'electronic seal';

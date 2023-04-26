@@ -18,7 +18,9 @@ func (s *Server) hndlrIndex(w http.ResponseWriter, r *http.Request) {
 }
 
 type prmsTranslate struct {
+	From string `json:"from"`
 	Text string `json:"text"`
+	To   string `json:"to"`
 }
 
 func (s *Server) hndlrTranslate(w http.ResponseWriter, r *http.Request) {
@@ -36,7 +38,13 @@ func (s *Server) hndlrTranslate(w http.ResponseWriter, r *http.Request) {
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		cmd := exec.Command("/usr/bin/python3", s.pythonScriptsPath+"/google_translator.py", "-t", prms.Text)
+		cmd := exec.Command(
+			"/usr/bin/python3",
+			s.pythonScriptsPath+"/google_translator.py",
+			"-t", prms.Text,
+			"-s", prms.From,
+			"-d", prms.To,
+		)
 		out, err := cmd.Output()
 		if err != nil {
 			log.Printf("python exec err: %v", err)
@@ -49,20 +57,34 @@ func (s *Server) hndlrTranslate(w http.ResponseWriter, r *http.Request) {
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		cmd := exec.Command("/usr/bin/python3", s.pythonScriptsPath+"/reverso.py", "-t", prms.Text, "-c", "e")
+		cmd := exec.Command(
+			"/usr/bin/python3",
+			s.pythonScriptsPath+"/reverso.py",
+			"-t", prms.Text,
+			"-s", prms.From,
+			"-d", prms.To,
+			"-c", "e",
+		)
 		out, err := cmd.Output()
 		if err != nil {
 			log.Printf("python exec err: %v", err)
 			return
 		}
 
-		result["example"] = string(out)
+		result["example"] = s.findExample(prms.Text, prms.To) + string(out)
 	}()
 
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		cmd := exec.Command("/usr/bin/python3", s.pythonScriptsPath+"/reverso.py", "-t", prms.Text, "-c", "t")
+		cmd := exec.Command(
+			"/usr/bin/python3",
+			s.pythonScriptsPath+"/reverso.py",
+			"-t", prms.Text,
+			"-s", prms.From,
+			"-d", prms.To,
+			"-c", "t",
+		)
 		out, err := cmd.Output()
 		if err != nil {
 			log.Printf("python exec err: %v", err)
@@ -75,7 +97,12 @@ func (s *Server) hndlrTranslate(w http.ResponseWriter, r *http.Request) {
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		cmd := exec.Command("/usr/bin/python3", s.pythonScriptsPath+"/blob.py", "-t", prms.Text)
+		cmd := exec.Command(
+			"/usr/bin/python3",
+			s.pythonScriptsPath+"/blob.py",
+			"-t", prms.Text,
+			"-s", prms.From,
+		)
 		out, err := cmd.Output()
 		if err != nil {
 			log.Printf("python exec err: %v", err)
@@ -93,7 +120,7 @@ func (s *Server) hndlrTranslate(w http.ResponseWriter, r *http.Request) {
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		result["glossary"] = s.findGloss(prms.Text)
+		result["glossary"] = s.findGloss(prms.Text, prms.To)
 	}()
 
 	wg.Wait()

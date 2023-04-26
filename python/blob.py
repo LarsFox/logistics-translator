@@ -2,6 +2,7 @@ import argparse
 import json
 
 from textblob import TextBlob
+from textblob_de import TextBlobDE
 
 # CC coordinating conjunction
 # CD cardinal digit
@@ -41,7 +42,12 @@ from textblob import TextBlob
 
 def main(args):
     sentences = args.text.split('. ')
-    blob = [TextBlob(s).tags for s in sentences]
+
+    if args.source == "de":
+        blob = [TextBlobDE(s).tags for s in sentences]
+    else:
+        blob = [TextBlob(s).tags for s in sentences]
+
     print(json.dumps({
         "tags": blob
     }, ensure_ascii=False))
@@ -49,7 +55,8 @@ def main(args):
 
 def init():
     parser = argparse.ArgumentParser(description='Translate blobber')
-    parser.add_argument('-t', '--text', action='store', dest='text', type=str, default='', help='Text for blob')
+    parser.add_argument('-t', '--text', action='store', dest='text', type=str, default='')
+    parser.add_argument('-s', '--source', action='store', dest='source', type=str, default='')
     args = parser.parse_args()
 
     try:

@@ -12,6 +12,7 @@ import (
 )
 
 type glossaryTerm struct {
+	lang       string
 	term       string
 	gloss      string
 	example    string

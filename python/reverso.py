@@ -7,8 +7,8 @@ def main(args):
     api = ReversoContextAPI(
         args.text,
         "",
-        "en",
-        "ru"
+        args.source,
+        args.destination
     )
 
     if args.command == "translation" or args.command == "t":
@@ -34,7 +34,9 @@ def translation(api):
 
 def init():
     parser = argparse.ArgumentParser(description='Translate with reverso')
-    parser.add_argument('-t', '--text', action='store', dest='text', type=str, default='', help='Text for blob')
+    parser.add_argument('-t', '--text', action='store', dest='text', type=str, default='')
+    parser.add_argument('-s', '--source', action='store', dest='source', type=str, default='')
+    parser.add_argument('-d', '--destination', action='store', dest='destination', type=str, default='')
     parser.add_argument('-c', '--command', action='store', dest='command', type=str, default='', help='Get example or translation')
     args = parser.parse_args()
 
